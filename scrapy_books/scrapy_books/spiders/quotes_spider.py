@@ -20,17 +20,19 @@ class QuotesSpider(scrapy.Spider):
             yield response.follow(next_page, callback=self.parse)
 
     def parse_product_details(self, response: Response, **kwargs):
+        rating_text = response.css(
+            ".star-rating::attr(class)"
+        ).re_first(r"star-rating (\w+)")
+        rating_map = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
         item = ScrapyBooksItem()
 
-        # Извлечение данных
         item["title"] = response.css(".product_main h1::text").get()
         item["price"] = response.css(".price_color::text").get()
         item["amount_in_stock"] = response.css(
             ".instock.availability::text"
         ).re_first(r"\d+") or "0"
         
-        # Подсчет звездочек с цветом
-        item["rating"] = len(response.css(".star-rating.Three i.icon-star"))
+        item["rating"] = rating_map.get(rating_text, 0)
         
         item["category"] = response.css(
             ".breadcrumb li:nth-child(3) a::text"
