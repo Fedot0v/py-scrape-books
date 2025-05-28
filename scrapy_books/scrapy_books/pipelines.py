@@ -11,5 +11,4 @@ from itemadapter import ItemAdapter
 class ScrapyBooksPipeline:
     def process_item(self, item, spider):
         item["price"] = float(item["price"].replace("£", "").strip())
-        item["rating"] = item["rating"].count(".icon-star")
         return item
